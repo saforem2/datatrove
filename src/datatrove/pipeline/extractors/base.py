@@ -43,8 +43,8 @@ class BaseExtractor(PipelineStep):
         signal.signal(signal.SIGALRM, signal_handler)
         signal.setitimer(signal.ITIMER_REAL, self.timeout)
         try:
-            return self.extract(doc.text)
-
+            extracted = self.extract(doc.text)
+            return extracted
         except TimeoutError:
             logger.warning("⏰ Timeout while cleaning record text. Skipping record.")
 
@@ -53,6 +53,7 @@ class BaseExtractor(PipelineStep):
 
         finally:
             signal.setitimer(signal.ITIMER_REAL, 0)
+            signal.signal(signal.SIGALRM, signal.SIG_DFL)
 
     def run(self, data: DocumentsPipeline, rank: int = 0, world_size: int = 1) -> DocumentsPipeline:
         for doc in data:
