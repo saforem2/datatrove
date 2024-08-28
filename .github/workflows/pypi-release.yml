@@ -11,6 +11,9 @@ jobs:
     env:
       TWINE_USERNAME: __token__
 
+    permissions:
+      contents: write  # needed to create a tag
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -35,7 +38,8 @@ jobs:
 
       - name: Test installing from test PyPI and running tests
         run: |
-          pip install -i https://testpypi.python.org/pypi --extra-index-url https://pypi.org/simple datatrove[testing]
+          python -m pip install uv
+          uv pip install -i https://testpypi.python.org/pypi --extra-index-url https://pypi.org/simple datatrove[testing]
           python -m nltk.downloader punkt
           make test
 
@@ -54,6 +58,8 @@ jobs:
               ref: 'refs/tags/v${{ steps.get_tag_name.outputs.TAG_NAME }}',
               sha: context.sha
             })
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # needed to tag
 
       - name: Publish to PyPI
         env:
